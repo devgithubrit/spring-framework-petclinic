@@ -10,13 +10,8 @@ pool:
   vmImage: ubuntu-latest
 
 steps:
- task: ExtractFiles@1
-  inputs:
-    archiveFilePatterns: '**/*.zip'
-    destinationFolder: '$(Build.SourcesDirectory)'
-    cleanDestinationFolder: true
-    overwriteExistingFiles: false
 - task: Maven@4
+  inputs:
     mavenPomFile: 'pom.xml'
     publishJUnitResults: true
     testResultsFiles: '**/surefire-reports/TEST-*.xml'
@@ -25,4 +20,13 @@ steps:
     mavenAuthenticateFeed: false
     effectivePomSkip: false
     sonarQubeRunAnalysis: false
-  
+ - task: CopyFiles@2
+   inputs:
+     SourceFolder: '$(Build.SourcesDirectory)'
+     Contents: '**'
+     TargetFolder: '$(Build.ArtifactStagingDirectory)'
+     - task: PublishBuildArtifacts@1
+       inputs:
+         PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+         ArtifactName: 'drop'
+         publishLocation: 'Container'
